@@ -3,12 +3,13 @@ pipeline {
   tools {
   maven 'maven'
   }
-stage ('Build')  {
+    stages {
+           stage ('Build')  {
 	    steps {
-        dir('app'){
-            sh "mvn package"
+              dir('app'){
+              sh "mvn package"
           }
-        }    
+        }
    }
   }
   }
