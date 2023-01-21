@@ -4,13 +4,18 @@ pipeline {
          label "valaxy"
       }
     }
+    environment {
+        PATH = "/opt/maven/bin:$PATH"
+    }
     stages {
         stage('Build') {
             steps {
+                dir('app'){
                 echo '<--------------- Building started --------------->'
                 sh 'printenv'
                 sh 'mvn clean install'
                 echo '<------------- Build completed --------------->'
+            }
             }
         }
 
