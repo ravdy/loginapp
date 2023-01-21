@@ -19,18 +19,38 @@ pipeline {
             }
         }
 
-  stage ("Sonar Analysis") {
+  stage('Unit Test') {
+            steps {
+                echo '<--------------- Unit Testing started  --------------->'
+                sh 'mvn surefire-report:report'
+                echo '<------------- Unit Testing stopped  --------------->'
+            }
+        }    
+       stage ("Sonar Analysis") {
             environment {
-               scannerHome = tool 'Valaxy-SonarScanner'  //scanner name configured for slave 
+               scannerHome = tool 'valaxy-sonarscanner'
             }
             steps {
                 echo '<--------------- Sonar Analysis started  --------------->'
-                withSonarQubeEnv('Valaxy-SonarQube') {    
-                    //sonarqube server name in master
+                withSonarQubeEnv('valaxy-sonarqube-server') {    
                     sh "${scannerHome}/bin/sonar-scanner"
                 }    
-                echo '<--------------- Sonar Analysis stopped  --------------->'
+              echo '<--------------- Sonar Analysis stopped  --------------->' 
             }   
+        }
+       stage("Quality Gate") {
+            steps {
+                script {
+                  echo '<--------------- Sonar Gate Analysis Started --------------->'
+                    timeout(time: 1, unit: 'HOURS'){
+                       def qg = waitForQualityGate()
+                        if(qg.status !='OK') {
+                            error "Pipeline failed due to quality gate failures: ${qg.status}"
+                        }
+                    }  
+                  echo '<--------------- Sonar Gate Analysis Ends  --------------->'
+                }
+            }
         }
     }
 }
